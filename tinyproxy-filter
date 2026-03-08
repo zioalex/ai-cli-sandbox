@@ -8,3 +8,8 @@
 ^github\.com$
 ^api\.github\.com$
 ^pypi\.org$
+^files\.pythonhosted\.org$
+^models\.dev$
+^registry\.npmjs\.org$
+^generativelanguage\.googleapis\.com$
+
