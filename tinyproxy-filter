@@ -12,4 +12,6 @@
 ^models\.dev$
 ^registry\.npmjs\.org$
 ^generativelanguage\.googleapis\.com$
+^api\.getbible\.net$
+
 
