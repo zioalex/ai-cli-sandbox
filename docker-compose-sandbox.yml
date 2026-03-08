@@ -1,0 +1,36 @@
+services:
+  opencode-sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile_sandbox
+    # image: node:20-slim
+    container_name: opencode-backend
+    runtime: runsc  # <--- Essential for gVisor isolation
+    # This relaxes gVisor's file system proxy (Gofer) 
+    # so it allows the file locks SQLite needs.
+    #    security_opt:
+    #  - "type=bind,source=/,target=/,bind-nonrecursive"
+    working_dir: /workspace
+    volumes:
+      # Mirror your host setup into the sandbox
+      - ~/.config/opencode:/home/node/.config/opencode:rw
+      - ~/.opencode:/home/node/.opencode:rw
+      - ~/.local/share/opencode:/home/node/.local/share/opencode:rw
+        #- opencode-db:/home/node/.local/share/opencode:rw
+      - .:/workspace:rw
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+        # Force OpenCode to use paths we know are mounted and writable
+      - XDG_CONFIG_HOME=/home/node/.config
+      - XDG_DATA_HOME=/home/node/.local/share
+      - XDG_STATE_HOME=/home/node/.local/state
+        #- XDG_DATA_HOME=/tmp/opencode_data
+      - SQLITE_LOCKING_MODE=EXCLUSIVE
+      - SQLITE_JOURNAL_MODE=TRUNCATE
+    ports:
+      - "4096:4096"
+    user: "1000:1000" # Matches your Linux UID to prevent permission issues
+
+volumes:
+  opencode-db: # Docker manages this filesystem natively

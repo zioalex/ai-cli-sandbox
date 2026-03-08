@@ -1,0 +1,10 @@
+FROM node:20-slim
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+RUN npm install -g opencode-ai@latest global-agent
+ENV NODE_PATH=/usr/local/lib/node_modules
+RUN mkdir -p /home/node/.local/state /home/node/.local/share/opencode /home/node/.config/opencode \
+    && chown -R node:node /home/node/.local /home/node/.config /home/node/.local/share/opencode
+WORKDIR /workspace
+USER node
+ENTRYPOINT []
+CMD ["node", "-r", "global-agent/bootstrap", "/usr/local/bin/opencode", "serve", "--port", "4096", "--hostname", "0.0.0.0"]

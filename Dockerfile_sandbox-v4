@@ -1,0 +1,17 @@
+FROM node:20-slim
+ARG CLAUDE_CODE_VERSION=latest
+RUN apt-get update && apt-get install -y git gh python3 python3-pip \
+    azure-cli make file \
+    # DEBUG
+    && apt install -y bind9-dnsutils iproute2 curl iputils-ping \
+    && rm -rf /var/lib/apt/lists/*
+# Install Claude
+RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}
+
+RUN npm install -g opencode-ai@latest
+RUN mkdir -p /home/node/.local/state /home/node/.local/share/opencode /home/node/.config/opencode \
+    && chown -R node:node /home/node/.local /home/node/.config /home/node/.local/share/opencode
+WORKDIR /workspace
+USER node
+ENTRYPOINT []
+CMD ["opencode", "serve", "--port", "4096", "--hostname", "0.0.0.0"]

@@ -1,0 +1,10 @@
+# tinyproxy filter — one regex per line, matched against the host
+^api\.anthropic\.com$
+^platform\.claude\.com$
+^api\.githubcopilot\.com$
+^copilot-proxy\.githubusercontent\.com$
+^openrouter\.ai$
+^api\.openrouter\.ai$
+^github\.com$
+^api\.github\.com$
+^pypi\.org$

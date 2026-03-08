@@ -1,0 +1,35 @@
+# Use a stable Node base
+FROM node:20-slim
+
+# Install git (OpenCode needs it for snapshots/diffs)
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# Pre-install OpenCode so we don't need internet at runtime
+RUN npm install -g opencode-ai@latest
+
+# Force all Node.js HTTP(S) through the proxy
+RUN npm install -g global-agent
+
+# Create the expected XDG directory structure and set permissions
+RUN mkdir -p /home/node/.local/state /home/node/.local/share/opencode /home/node/.config/opencode \
+    && chown -R node:node /home/node/.local /home/node/.config /home/node/.local/share/opencode
+
+# Set the working directory
+WORKDIR /workspace
+
+# Default user for security (Matches standard Linux UID)
+USER node
+
+# Start the server
+ENTRYPOINT []
+CMD ["opencode", "serve", "--port", "4096", "--hostname", "0.0.0.0"]
+
+## Fix file permissions
+# groudadd -g 1000 opencode
+# cd ~
+# sudo chgrp -R opencode .opencode/ && sudo chmod -R g+rw .opencode/
+# cd ~/.config
+# sudo chgrp -R opencode opencode/ && sudo chmod -R g+rw opencode/
+# cd ~/.local/share
+# sudo chgrp -R opencode opencode/ && sudo chmod -R g+rw opencode/
+# sudo rm -f .opencode/*.db-shm .opencode/*.db-wal .opencode/*.db-journal

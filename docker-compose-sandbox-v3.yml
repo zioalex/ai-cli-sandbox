@@ -1,0 +1,54 @@
+services:
+  egress-proxy:
+    image: vimagick/tinyproxy
+    container_name: egress-proxy
+    volumes:
+      - ./tinyproxy.conf:/etc/tinyproxy/tinyproxy.conf:ro
+      - ./tinyproxy-filter:/etc/tinyproxy/filter:ro
+    networks:
+      sandbox-internal:
+      proxy-external:
+    restart: unless-stopped
+
+  opencode-sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile_sandbox-v4
+    container_name: opencode-backend
+    runtime: runsc
+    working_dir: /workspace
+    depends_on:
+      - egress-proxy
+    volumes:
+      - ~/.config/opencode:/home/node/.config/opencode:rw
+      - ~/.opencode:/home/node/.opencode:rw
+      - ~/.local/share/opencode:/home/node/.local/share/opencode:rw
+      - .:/workspace:rw
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - XDG_CONFIG_HOME=/home/node/.config
+      - XDG_DATA_HOME=/home/node/.local/share
+      - XDG_STATE_HOME=/home/node/.local/state
+      - SQLITE_LOCKING_MODE=EXCLUSIVE
+      - SQLITE_JOURNAL_MODE=TRUNCATE
+      - HTTP_PROXY=http://egress-proxy:8888
+      - HTTPS_PROXY=http://egress-proxy:8888
+      - http_proxy=http://egress-proxy:8888
+      - https_proxy=http://egress-proxy:8888
+      - NO_PROXY=localhost,127.0.0.1
+    ports:
+      - "4096:4096"
+    user: "1000:1000"
+    networks:
+      sandbox-internal:
+      host-access:
+
+networks:
+  sandbox-internal:
+    internal: true
+  proxy-external:
+    driver: bridge
+  host-access:
+    driver: bridge
+    internal: false
