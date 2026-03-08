@@ -1,0 +1,2 @@
+# Local environment — contains secrets and machine-specific UID/GID, never commit
+.env
